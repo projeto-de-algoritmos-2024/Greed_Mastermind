@@ -10,8 +10,6 @@ if (storedPlans) {
   // Verifica se o formato esperado é correto
   if (parsedPlans.tasks && Array.isArray(parsedPlans.tasks)) {
     const planningType = parsedPlans.algorithm || "Sem tipo de planejamento";
-    document.getElementById("planning-type").textContent = `Tipo de Planejamento: ${planningType}`;
-
     const tasksContainer = document.getElementById("tasks-container");
 
     // Funções para os algoritmos
@@ -150,4 +148,12 @@ if (storedPlans) {
 } else {
   console.error("Nenhum planejamento foi encontrado no localStorage.");
   document.getElementById("planning-type").textContent = "Nenhum planejamento encontrado.";
+}
+
+// Adicionar evento ao botão "Voltar para a Página Inicial"
+const backToHomeButton = document.getElementById("back-to-home");
+if (backToHomeButton) {
+  backToHomeButton.addEventListener("click", () => {
+    window.location.href = "index.html"; // Redirecionar para a página inicial
+  });
 }
