@@ -66,6 +66,16 @@ document.addEventListener("DOMContentLoaded", function () {
             <form class="task-form">
               <label for="activity">Nome da Atividade:</label>
               <input type="text" name="activity" required>
+              <label for="day">Dia da Semana:</label>
+              <select name="day" required>
+                <option value="segunda">Segunda</option>
+                <option value="terça">Terça</option>
+                <option value="quarta">Quarta</option>
+                <option value="quinta">Quinta</option>
+                <option value="sexta">Sexta</option>
+                <option value="sábado">Sábado</option>
+                <option value="domingo">Domingo</option>
+              </select>
               <label for="startTime">Hora de Início:</label>
               <input type="time" name="startTime" required>
               <label for="endTime">Hora de Término:</label>
