@@ -1,45 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Adicionar Planejamento</title>
+  <title>Adicionar Tarefas</title>
   <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
-  <h1>Adicionar Planejamento</h1>
-  
-  <form id="planningForm">
-    <label for="activity">Nome da Atividade:</label>
-    <input type="text" id="activity" name="activity" required>
-    
-    <label for="day">Dia da Semana:</label>
-    <select id="day" name="day" required>
-      <option value="segunda">Segunda</option>
-      <option value="terça">Terça</option>
-      <option value="quarta">Quarta</option>
-      <option value="quinta">Quinta</option>
-      <option value="sexta">Sexta</option>
-      <option value="sábado">Sábado</option>
-      <option value="domingo">Domingo</option>
-    </select>
-    
-    <label for="startTime">Hora de Início:</label>
-    <input type="time" id="startTime" name="startTime" required>
-    
-    <label for="endTime">Hora de Término:</label>
-    <input type="time" id="endTime" name="endTime" required>
-    
-    <label for="algorithm">Tipo de Planejamento:</label>
-    <select id="algorithm" name="algorithm" required>
-      <option value="intervalPartitioning">Interval Partitioning</option>
-      <option value="intervalScheduling">Interval Scheduling</option>
-      <option value="minimizeLateness">Minimize Lateness</option>
-    </select>
-    
-    <button type="submit">Calcular</button>
-  </form>
-  
+  <h1>Adicionar Tarefas</h1>
+  <div id="formContainer"></div>
+
+  <button id="addFormBtn">Adicionar mais tarefa</button>
+  <button id="calculateBtn">Calcular</button>
+
   <script src="scripts/app.js"></script>
 </body>
 </html>

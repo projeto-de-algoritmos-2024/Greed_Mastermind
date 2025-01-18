@@ -1,60 +1,122 @@
-// scripts/app.js
+document.addEventListener("DOMContentLoaded", function () {
+  // Verifica se o botão "add-plan" existe antes de adicionar o evento
+  const addPlanButton = document.getElementById("add-plan");
+  if (addPlanButton) {
+    addPlanButton.addEventListener("click", function () {
+      const dropdown = document.getElementById("plan-dropdown");
+      dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+    });
+  }
 
-// Inicializa a lista de planejamentos
-let plans = JSON.parse(localStorage.getItem("plans")) || [];
+  // Verifica se os botões do dropdown existem antes de adicionar os eventos
+  const planDropdownButtons = document.querySelectorAll("#plan-dropdown button");
+  if (planDropdownButtons.length > 0) {
+    planDropdownButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const planType = this.getAttribute("data-plan");
+        window.location.href = `add.html?type=${planType}`;
+      });
+    });
+  }
 
-// Exibe os planejamentos na página inicial
-function renderPlans() {
-  const planList = document.getElementById("plan-list");
-  planList.innerHTML = ""; // Limpa a lista antes de renderizar
-  plans.forEach((plan, index) => {
-    const li = document.createElement("li");
-    li.textContent = `Planejamento ${index + 1}: ${plan.name}`;
-    planList.appendChild(li);
-  });
-}
+  // Verifica se está na página "add.html" antes de renderizar o formulário
+  if (window.location.pathname.includes("add.html")) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const planningType = urlParams.get("type");
+    const formContainer = document.getElementById("formContainer");
 
-// Redireciona para a página de adicionar planejamento
-document.getElementById("add-plan").addEventListener("click", () => {
-  window.location.href = "add.html";
-});
+    if (formContainer) {
+      // Função para gerar um formulário baseado no tipo de planejamento
+      const createForm = () => {
+        let formHTML = "";
+        if (planningType === "minimizeLateness") {
+          formHTML = `
+            <form class="task-form">
+              <label for="activity">Nome da Atividade:</label>
+              <input type="text" name="activity" required>
+              <label for="difficulty">Dificuldade em dias:</label>
+              <input type="number" name="difficulty" required>
+              <label for="daysUntil">Dias até a entrega:</label>
+              <input type="number" name="daysUntil" required>
+            </form>
+          `;
+        } else if (planningType === "intervalPartitioning") {
+          formHTML = `
+            <form class="task-form">
+              <label for="activity">Nome da Atividade:</label>
+              <input type="text" name="activity" required>
+              <label for="day">Dia da Semana:</label>
+              <select name="day" required>
+                <option value="segunda">Segunda</option>
+                <option value="terça">Terça</option>
+                <option value="quarta">Quarta</option>
+                <option value="quinta">Quinta</option>
+                <option value="sexta">Sexta</option>
+                <option value="sábado">Sábado</option>
+                <option value="domingo">Domingo</option>
+              </select>
+              <label for="startTime">Hora de Início:</label>
+              <input type="time" name="startTime" required>
+              <label for="endTime">Hora de Término:</label>
+              <input type="time" name="endTime" required>
+            </form>
+          `;
+        } else if (planningType === "intervalScheduling") {
+          formHTML = `
+            <form class="task-form">
+              <label for="activity">Nome da Atividade:</label>
+              <input type="text" name="activity" required>
+              <label for="startTime">Hora de Início:</label>
+              <input type="time" name="startTime" required>
+              <label for="endTime">Hora de Término:</label>
+              <input type="time" name="endTime" required>
+            </form>
+          `;
+        }
+        return formHTML;
+      };
 
-// Redireciona para o modo Machiavelli
-document.getElementById("machiavelli-mode").addEventListener("click", () => {
-  window.location.href = "machiavelli.html";
-});
+      // Insere o primeiro formulário na página
+      formContainer.innerHTML = createForm();
 
-// Renderiza os planejamentos ao carregar a página
-renderPlans();
+      // Adiciona evento para o botão "Adicionar mais tarefa"
+      const addFormBtn = document.getElementById("addFormBtn");
+      if (addFormBtn) {
+        addFormBtn.addEventListener("click", function () {
+          // Cria um novo formulário e adiciona ao contêiner
+          const newForm = document.createElement("div");
+          newForm.innerHTML = createForm();
+          formContainer.appendChild(newForm);
+        });
+      }
 
-// Selecionar o formulário
-const planningForm = document.getElementById('planningForm');
+      // Adiciona evento ao botão "Calcular"
+      const calculateBtn = document.getElementById("calculateBtn");
+      if (calculateBtn) {
+        calculateBtn.addEventListener("click", function () {
+          // Coleta os dados de todos os formulários
+          const forms = document.querySelectorAll(".task-form");
+          const tasks = [];
 
-// Evento de envio do formulário
-planningForm.addEventListener('submit', function (event) {
-  event.preventDefault(); // Evitar recarregar a página
+          forms.forEach((form) => {
+            const formData = new FormData(form);
+            const task = Object.fromEntries(formData.entries());
+            tasks.push(task);
+          });
 
-  // Obter os valores dos campos
-  const activity = document.getElementById('activity').value;
-  const day = document.getElementById('day').value;
-  const startTime = document.getElementById('startTime').value;
-  const endTime = document.getElementById('endTime').value;
-  const algorithm = document.getElementById('algorithm').value;
+          // Salva os dados no localStorage
+          localStorage.setItem(
+            "plans",
+            JSON.stringify({
+              algorithm: planningType,
+              tasks: tasks,
+            })
+          );
 
-  // Criar um objeto para armazenar a atividade
-  const planningData = {
-    activity,
-    day,
-    startTime,
-    endTime,
-    algorithm,
-  };
-
-  // Salvar no localStorage
-  let savedPlannings = JSON.parse(localStorage.getItem('plannings')) || [];
-  savedPlannings.push(planningData);
-  localStorage.setItem('plannings', JSON.stringify(savedPlannings));
-
-  // Redirecionar para a página de resultado
-  window.location.href = 'result.html';
+          // Redireciona para a página de resultados
+          window.location.href = "result.html";
+        });
+      }
+    }
+  }
 });
