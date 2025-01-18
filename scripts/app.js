@@ -26,3 +26,35 @@ document.getElementById("machiavelli-mode").addEventListener("click", () => {
 
 // Renderiza os planejamentos ao carregar a página
 renderPlans();
+
+// Selecionar o formulário
+const planningForm = document.getElementById('planningForm');
+
+// Evento de envio do formulário
+planningForm.addEventListener('submit', function (event) {
+  event.preventDefault(); // Evitar recarregar a página
+
+  // Obter os valores dos campos
+  const activity = document.getElementById('activity').value;
+  const day = document.getElementById('day').value;
+  const startTime = document.getElementById('startTime').value;
+  const endTime = document.getElementById('endTime').value;
+  const algorithm = document.getElementById('algorithm').value;
+
+  // Criar um objeto para armazenar a atividade
+  const planningData = {
+    activity,
+    day,
+    startTime,
+    endTime,
+    algorithm,
+  };
+
+  // Salvar no localStorage
+  let savedPlannings = JSON.parse(localStorage.getItem('plannings')) || [];
+  savedPlannings.push(planningData);
+  localStorage.setItem('plannings', JSON.stringify(savedPlannings));
+
+  // Redirecionar para a página de resultado
+  window.location.href = 'result.html';
+});
