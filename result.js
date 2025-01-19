@@ -9,8 +9,10 @@ if (storedPlans) {
 
   // Verifica se o formato esperado é correto
   if (parsedPlans.tasks && Array.isArray(parsedPlans.tasks)) {
+    console.log("Formato dos dados verificado: 'tasks' é um array.");
     const planningType = parsedPlans.algorithm || "Sem tipo de planejamento";
     const tasksContainer = document.getElementById("tasks-container");
+    console.log(`Tipo de planejamento identificado: ${planningType}`);
 
     // Funções para os algoritmos
     const intervalScheduling = (tasks) => {
@@ -52,6 +54,7 @@ if (storedPlans) {
     };
 
     const minimizeLateness = (tasks) => {
+      console.log("Função minimizeLateness iniciada.");
       tasks.sort((a, b) => a.daysUntil - b.daysUntil);
       const schedule = [];
       let currentTime = 0;
@@ -67,81 +70,85 @@ if (storedPlans) {
       return { schedule, maxLateness };
     };
 
-    // Criar um mapeamento para organizar tarefas por dia da semana
-    const daysOfWeek = ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"];
-    const tasksByDay = {};
+    // Função separada para o planejamento 'minimizeLateness'
+    if (planningType === "minimizeLateness") {
+      const { schedule, maxLateness } = minimizeLateness(parsedPlans.tasks);
 
-    daysOfWeek.forEach((day) => {
-      tasksByDay[day] = parsedPlans.tasks.filter((task) => task.day === day);
-    });
+      // Exibir todas as tarefas minimizando o atraso
+      schedule.forEach((task, index) => {
+        const taskElement = document.createElement("div");
+        taskElement.classList.add("task");
+        taskElement.innerHTML = `
+          <h3>Tarefa ${index + 1}</h3>
+          <p><strong>Atividade:</strong> ${task.activity}</p>
+          <p><strong>Dificuldade:</strong> ${task.difficulty} dias</p>
+          <p><strong>Dias até a entrega:</strong> ${task.daysUntil}</p>
+          <p><strong>Atraso:</strong> ${task.lateness} dias</p>
+        `;
+        tasksContainer.appendChild(taskElement);
+      });
 
-    // Processar cada dia da semana
-    daysOfWeek.forEach((day) => {
-      const tasksForDay = tasksByDay[day];
+      const latenessElement = document.createElement("div");
+      latenessElement.innerHTML = `<h3>Máximo Atraso: ${maxLateness} dias</h3>`;
+      tasksContainer.appendChild(latenessElement);
+    } else {
+      // Criar um mapeamento para organizar tarefas por dia da semana
+      const daysOfWeek = ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"];
+      const tasksByDay = {};
 
-      if (tasksForDay.length > 0) {
-        const dayContainer = document.createElement("div");
-        dayContainer.classList.add("day-container");
-        dayContainer.innerHTML = `<h2>${day.charAt(0).toUpperCase() + day.slice(1)}</h2>`;
+      daysOfWeek.forEach((day) => {
+        tasksByDay[day] = parsedPlans.tasks.filter((task) => task.day === day);
+      });
 
-        if (planningType === "intervalScheduling") {
-          const selectedTasks = intervalScheduling(tasksForDay);
+      // Processar cada dia da semana para os tipos 'intervalScheduling' e 'intervalPartitioning'
+      daysOfWeek.forEach((day) => {
+        const tasksForDay = tasksByDay[day];
 
-          selectedTasks.forEach((task, index) => {
-            const taskElement = document.createElement("div");
-            taskElement.classList.add("task");
-            taskElement.innerHTML = `
-              <h3>Tarefa ${index + 1}</h3>
-              <p><strong>Atividade:</strong> ${task.activity}</p>
-              <p><strong>Início:</strong> ${task.startTime}</p>
-              <p><strong>Término:</strong> ${task.endTime}</p>
-            `;
-            dayContainer.appendChild(taskElement);
-          });
-        } else if (planningType === "intervalPartitioning") {
-          const classrooms = intervalPartitioning(tasksForDay);
+        if (tasksForDay.length > 0) {
+          const dayContainer = document.createElement("div");
+          dayContainer.classList.add("day-container");
+          dayContainer.innerHTML = `<h2>${day.charAt(0).toUpperCase() + day.slice(1)}</h2>`;
 
-          classrooms.forEach((classroom, index) => {
-            const classroomElement = document.createElement("div");
-            classroomElement.classList.add("classroom");
-            classroomElement.innerHTML = `<h3>Sala ${index + 1}</h3>`;
+          if (planningType === "intervalScheduling") {
+            const selectedTasks = intervalScheduling(tasksForDay);
 
-            classroom.forEach((task) => {
-              classroomElement.innerHTML += `
+            selectedTasks.forEach((task, index) => {
+              const taskElement = document.createElement("div");
+              taskElement.classList.add("task");
+              taskElement.innerHTML = `
+                <h3>Tarefa ${index + 1}</h3>
                 <p><strong>Atividade:</strong> ${task.activity}</p>
                 <p><strong>Início:</strong> ${task.startTime}</p>
                 <p><strong>Término:</strong> ${task.endTime}</p>
               `;
+              dayContainer.appendChild(taskElement);
             });
+          } else if (planningType === "intervalPartitioning") {
+            const classrooms = intervalPartitioning(tasksForDay);
 
-            dayContainer.appendChild(classroomElement);
-          });
-        } else if (planningType === "minimizeLateness") {
-          const { schedule, maxLateness } = minimizeLateness(tasksForDay);
+            classrooms.forEach((classroom, index) => {
+              const classroomElement = document.createElement("div");
+              classroomElement.classList.add("classroom");
+              classroomElement.innerHTML = `<h3>Sala ${index + 1}</h3>`;
 
-          schedule.forEach((task, index) => {
-            const taskElement = document.createElement("div");
-            taskElement.classList.add("task");
-            taskElement.innerHTML = `
-              <h3>Tarefa ${index + 1}</h3>
-              <p><strong>Atividade:</strong> ${task.activity}</p>
-              <p><strong>Dificuldade:</strong> ${task.difficulty} dias</p>
-              <p><strong>Dias até a entrega:</strong> ${task.daysUntil}</p>
-              <p><strong>Atraso:</strong> ${task.lateness} dias</p>
-            `;
-            dayContainer.appendChild(taskElement);
-          });
+              classroom.forEach((task) => {
+                classroomElement.innerHTML += `
+                  <p><strong>Atividade:</strong> ${task.activity}</p>
+                  <p><strong>Início:</strong> ${task.startTime}</p>
+                  <p><strong>Término:</strong> ${task.endTime}</p>
+                `;
+              });
 
-          const latenessElement = document.createElement("div");
-          latenessElement.innerHTML = `<h3>Máximo Atraso: ${maxLateness} dias</h3>`;
-          dayContainer.appendChild(latenessElement);
-        } else {
-          dayContainer.innerHTML += "<p>Tipo de planejamento desconhecido.</p>";
+              dayContainer.appendChild(classroomElement);
+            });
+          } else {
+            dayContainer.innerHTML += "<p>Tipo de planejamento desconhecido.</p>";
+          }
+
+          tasksContainer.appendChild(dayContainer);
         }
-
-        tasksContainer.appendChild(dayContainer);
-      }
-    });
+      });
+    }
   } else {
     console.error("Os dados de tarefas estão em um formato inválido.");
   }

@@ -33,13 +33,15 @@ document.addEventListener("DOMContentLoaded", function () {
           formHTML = `
             <form class="task-form">
               <label for="activity">Nome da Atividade:</label>
-              <input type="text" name="activity" required>
+              <input type="text" id="activity" name="activity" required>
+              
               <label for="difficulty">Dificuldade em dias:</label>
-              <input type="number" name="difficulty" required>
+              <input type="number" id="difficulty" name="difficulty" required>
+              
               <label for="daysUntil">Dias até a entrega:</label>
-              <input type="number" name="daysUntil" required>
+              <input type="number" id="daysUntil" name="daysUntil" required>
             </form>
-          `;
+          `;        
         } else if (planningType === "intervalPartitioning") {
           formHTML = `
             <form class="task-form">
