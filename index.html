@@ -1,22 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mastermind</title>
-  <link rel="stylesheet" href="styles/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastermind</title>
+    <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
-  <main class="centered-content">
-    <div id="actions">
-      <button id="add-plan">+ Novo Planejamento</button>
-      <div id="plan-dropdown" style="display: none;">
-        <button data-plan="intervalPartitioning">Planejamento Semanal</button>
-        <button data-plan="intervalScheduling">Planejamento do Dia</button>
-        <button data-plan="minimizeLateness">Planejamento de Estratégia</button>
-      </div>
-    </div>
-  </main>
-  <script src="scripts/app.js"></script>
+    <header class="empty-header">
+        <!-- Header vazio para o título da imagem -->
+    </header>
+    <section id="plans" class="plans-container">
+        <h2 class="plans-title">Seus Planejamentos</h2>
+        <div id="plan-list" class="plan-grid">
+            <!-- Os planejamentos serão inseridos aqui dinamicamente -->
+        </div>
+    </section>
+    <main class="centered-content">
+        <div id="actions">
+            <button id="add-plan">+ Novo Planejamento</button>
+            <div id="plan-dropdown" style="display: none;">
+                <button data-plan="intervalPartitioning">Planejamento Semanal</button>
+                <button data-plan="intervalScheduling">Planejamento do Dia</button>
+                <button data-plan="minimizeLateness">Planejamento de Estratégia</button>
+            </div>
+        </div>
+    </main>
+    <script src="scripts/db.js"></script>
+    <script src="scripts/app.js"></script>
 </body>
 </html>
