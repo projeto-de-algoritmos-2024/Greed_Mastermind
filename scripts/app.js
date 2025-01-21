@@ -134,52 +134,175 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Função para carregar os planejamentos
-  async function loadPlannings() {
-      const planList = document.getElementById('plan-list');
-      if (!planList) {
-          console.log('plan-list não encontrado');
-          return;
-      }
+  // Função para carregar os planejamentos
+async function loadPlannings() {
+    const planList = document.getElementById('plan-list');
+    if (!planList) {
+        console.log('plan-list não encontrado');
+        return;
+    }
 
-      try {
-          const db = new DatabaseConnection();
-          const plans = await db.getPlannings();
-          console.log('Planos carregados:', plans);
+    try {
+        const db = new DatabaseConnection();
+        const plans = await db.getPlannings();
+        console.log('Planos carregados:', plans);
 
-          if (plans.length === 0) {
-              planList.innerHTML = '<p class="no-plans">Nenhum planejamento criado ainda.</p>';
-              return;
-          }
+        // Salva os planos no localStorage de forma correta
+        localStorage.setItem("plans", JSON.stringify(plans));
+        console.log('Planos carregados:', plans);
+        planList.innerHTML = plans.map(plan => {
+            const progress = plan.total_tasks > 0 
+                ? (plan.completed_tasks / plan.total_tasks) * 100 
+                : 0;
 
-          planList.innerHTML = plans.map(plan => {
-              const progress = plan.total_tasks > 0 
-                  ? (plan.completed_tasks / plan.total_tasks) * 100 
-                  : 0;
+            return `
+                <div class="plan-card" data-plan-id="${plan.plan_id}">
+                    <div class="plan-header">
+                        <h3 class="plan-title">${plan.title}</h3>
+                        <div class="plan-type">${formatPlanType(plan.plan_type)}</div>
+                    </div>
+                    <div class="plan-stats">
+                        <span>${plan.total_tasks} tarefas</span>
+                        <span>${plan.completed_tasks} concluídas</span>
+                    </div>
+                    <div class="plan-progress">
+                        <div class="progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="plan-date">
+                        Criado em: ${new Date(plan.created_at).toLocaleDateString()}
+                    </div>
+                    <button class="view-details-btn" data-plan-id="${plan.plan_id}">
+                        Ver detalhes
+                    </button>
+                </div>
+            `;
+        }).join('');
 
-              return `
-                  <div class="plan-card" data-plan-id="${plan.plan_id}">
-                      <div class="plan-header">
-                          <h3 class="plan-title">${plan.title}</h3>
-                          <div class="plan-type">${formatPlanType(plan.plan_type)}</div>
-                      </div>
-                      <div class="plan-stats">
-                          <span>${plan.total_tasks} tarefas</span>
-                          <span>${plan.completed_tasks} concluídas</span>
-                      </div>
-                      <div class="plan-progress">
-                          <div class="progress-bar" style="width: ${progress}%"></div>
-                      </div>
-                      <div class="plan-date">
-                          Criado em: ${new Date(plan.created_at).toLocaleDateString()}
-                      </div>
-                  </div>
-              `;
-          }).join('');
-      } catch (error) {
-          console.error('Erro ao carregar planejamentos:', error);
-          planList.innerHTML = '<p class="error-message">Erro ao carregar os planejamentos.</p>';
-      }
-  }
+        // Adicionar evento de clique para os botões "Ver detalhes"
+        const detailButtons = document.querySelectorAll('.view-details-btn');
+        detailButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const planId = this.getAttribute('data-plan-id');
+                showPlanDetails(planId);
+            });
+        });
+    } catch (error) {
+        console.error('Erro ao carregar planejamentos:', error);
+        planList.innerHTML = '<p class="error-message">Erro ao carregar os planejamentos.</p>';
+    }
+}
+
+function showPlanDetails(planId) {
+    // Recupera os planos armazenados no localStorage
+    const storedPlans = JSON.parse(localStorage.getItem("plans")) || [];
+    console.log('Planos no localStorage:', storedPlans);
+
+    // Certifique-se de que ambos são números ou strings
+    const plan = storedPlans.find(p => p.plan_id === Number(planId)); // Forçando o planId a ser número
+
+    console.log('Número do id:', planId);
+    console.log('Plano encontrado:', plan);
+
+    if (plan) {
+        // Cria um container para os detalhes do plano
+        const planContainer = document.createElement("div");
+        planContainer.classList.add("plan-container");
+
+        // Exibe detalhes gerais do plano
+        planContainer.innerHTML = `
+            <h3>${plan.title}</h3>
+        `;
+
+        // Exibe as tarefas dependendo do tipo de planejamento
+        if (plan.tasks && Array.isArray(plan.tasks)) {
+            const tasksContainer = document.createElement("div");
+            tasksContainer.classList.add("tasks-container");
+            tasksContainer.innerHTML = "<h3>Tarefas</h3>";
+
+            // Exibe as tarefas de acordo com o tipo de planejamento
+            if (plan.plan_type === "minimizeLateness") {
+                // Exibe as tarefas com atraso minimizado
+                plan.tasks.forEach((task, index) => {
+                    const taskElement = document.createElement("div");
+                    taskElement.classList.add("task");
+                    taskElement.innerHTML = `
+                        <h4>Tarefa ${index + 1}</h4>
+                        <p><strong>Atividade:</strong> ${task.activity}</p>
+                        <p><strong>Dificuldade:</strong> ${task.difficulty} dias</p>
+                        <p><strong>Dias até a entrega:</strong> ${task.daysUntil}</p>
+                        <p><strong>Atraso:</strong> ${task.lateness} dias</p>
+                    `;
+                    tasksContainer.appendChild(taskElement);
+                });
+            } else if (plan.plan_type === "intervalScheduling") {
+                // Exibe as tarefas com agendamento de intervalos
+                const daysOfWeek = ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"];
+                daysOfWeek.forEach((day) => {
+                    const tasksForDay = plan.tasks.filter((task) => task.day === day);
+
+                    if (tasksForDay.length > 0) {
+                        const dayContainer = document.createElement("div");
+                        dayContainer.classList.add("day-container");
+                        dayContainer.innerHTML = `<h4>${day.charAt(0).toUpperCase() + day.slice(1)}</h4>`;
+
+                        tasksForDay.forEach((task, index) => {
+                            const taskElement = document.createElement("div");
+                            taskElement.classList.add("task");
+                            taskElement.innerHTML = `
+                                <h5>Tarefa ${index + 1}</h5>
+                                <p><strong>Atividade:</strong> ${task.activity}</p>
+                                <p><strong>Início:</strong> ${task.startTime}</p>
+                                <p><strong>Término:</strong> ${task.endTime}</p>
+                            `;
+                            dayContainer.appendChild(taskElement);
+                        });
+
+                        tasksContainer.appendChild(dayContainer);
+                    }
+                });
+            } else if (plan.plan_type === "intervalPartitioning") {
+                // Exibe as tarefas com partição de intervalos
+                const daysOfWeek = ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"];
+                daysOfWeek.forEach((day) => {
+                    const tasksForDay = plan.tasks.filter((task) => task.day === day);
+
+                    if (tasksForDay.length > 0) {
+                        const dayContainer = document.createElement("div");
+                        dayContainer.classList.add("day-container");
+                        dayContainer.innerHTML = `<h4>${day.charAt(0).toUpperCase() + day.slice(1)}</h4>`;
+
+                        // Aqui você pode organizar e exibir as tarefas de forma agrupada
+                        tasksForDay.forEach((task, index) => {
+                            const taskElement = document.createElement("div");
+                            taskElement.classList.add("task");
+                            taskElement.innerHTML = `
+                                <h5>Tarefa ${index + 1}</h5>
+                                <p><strong>Atividade:</strong> ${task.activity}</p>
+                                <p><strong>Início:</strong> ${task.startTime}</p>
+                                <p><strong>Término:</strong> ${task.endTime}</p>
+                            `;
+                            dayContainer.appendChild(taskElement);
+                        });
+
+                        tasksContainer.appendChild(dayContainer);
+                    }
+                });
+            }
+
+            planContainer.appendChild(tasksContainer);
+        } else {
+            const noTasksMessage = document.createElement("p");
+            noTasksMessage.textContent = "Este plano não possui tarefas.";
+            planContainer.appendChild(noTasksMessage);
+        }
+
+        // Exibe o container com os detalhes do plano
+        document.body.appendChild(planContainer); // Adiciona o conteúdo ao body ou outro container desejado
+    } else {
+        console.error('Plano não encontrado');
+        alert("Plano não encontrado.");
+    }
+}
 
   // Função para formatar o tipo do planejamento
   function formatPlanType(type) {
