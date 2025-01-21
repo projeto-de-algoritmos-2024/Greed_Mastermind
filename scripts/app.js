@@ -193,114 +193,95 @@ async function loadPlannings() {
 }
 
 function showPlanDetails(planId) {
-    // Recupera os planos armazenados no localStorage
+    // Remove qualquer modal existente
+    const existingModal = document.querySelector('.modal-overlay');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
     const storedPlans = JSON.parse(localStorage.getItem("plans")) || [];
-    console.log('Planos no localStorage:', storedPlans);
-
-    // Certifique-se de que ambos são números ou strings
-    const plan = storedPlans.find(p => p.plan_id === Number(planId)); // Forçando o planId a ser número
-
-    console.log('Número do id:', planId);
-    console.log('Plano encontrado:', plan);
+    const plan = storedPlans.find(p => p.plan_id === Number(planId));
 
     if (plan) {
-        // Cria um container para os detalhes do plano
-        const planContainer = document.createElement("div");
-        planContainer.classList.add("plan-container");
+        // Criar o modal
+        const modalOverlay = document.createElement('div');
+        modalOverlay.classList.add('modal-overlay');
 
-        // Exibe detalhes gerais do plano
-        planContainer.innerHTML = `
-            <h3>${plan.title}</h3>
-        `;
+        const modalContent = document.createElement('div');
+        modalContent.classList.add('modal-content');
 
-        // Exibe as tarefas dependendo do tipo de planejamento
-        if (plan.tasks && Array.isArray(plan.tasks)) {
-            const tasksContainer = document.createElement("div");
-            tasksContainer.classList.add("tasks-container");
-            tasksContainer.innerHTML = "<h3>Tarefas</h3>";
+        // Calcula o atraso para planejamento estratégico
+        if (plan.plan_type === "minimizeLateness") {
+            let currentTime = 0;
+            const tasksWithLateness = plan.tasks.map(task => {
+                currentTime += parseInt(task.difficulty);
+                const lateness = Math.max(0, currentTime - parseInt(task.daysUntil));
+                return { ...task, lateness };
+            });
 
-            // Exibe as tarefas de acordo com o tipo de planejamento
-            if (plan.plan_type === "minimizeLateness") {
-                // Exibe as tarefas com atraso minimizado
-                plan.tasks.forEach((task, index) => {
-                    const taskElement = document.createElement("div");
-                    taskElement.classList.add("task");
-                    taskElement.innerHTML = `
-                        <h4>Tarefa ${index + 1}</h4>
-                        <p><strong>Atividade:</strong> ${task.activity}</p>
-                        <p><strong>Dificuldade:</strong> ${task.difficulty} dias</p>
-                        <p><strong>Dias até a entrega:</strong> ${task.daysUntil}</p>
-                        <p><strong>Atraso:</strong> ${task.lateness} dias</p>
-                    `;
-                    tasksContainer.appendChild(taskElement);
-                });
-            } else if (plan.plan_type === "intervalScheduling") {
-                // Exibe as tarefas com agendamento de intervalos
-                const daysOfWeek = ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"];
-                daysOfWeek.forEach((day) => {
-                    const tasksForDay = plan.tasks.filter((task) => task.day === day);
-
-                    if (tasksForDay.length > 0) {
-                        const dayContainer = document.createElement("div");
-                        dayContainer.classList.add("day-container");
-                        dayContainer.innerHTML = `<h4>${day.charAt(0).toUpperCase() + day.slice(1)}</h4>`;
-
-                        tasksForDay.forEach((task, index) => {
-                            const taskElement = document.createElement("div");
-                            taskElement.classList.add("task");
-                            taskElement.innerHTML = `
-                                <h5>Tarefa ${index + 1}</h5>
-                                <p><strong>Atividade:</strong> ${task.activity}</p>
-                                <p><strong>Início:</strong> ${task.startTime}</p>
-                                <p><strong>Término:</strong> ${task.endTime}</p>
-                            `;
-                            dayContainer.appendChild(taskElement);
-                        });
-
-                        tasksContainer.appendChild(dayContainer);
-                    }
-                });
-            } else if (plan.plan_type === "intervalPartitioning") {
-                // Exibe as tarefas com partição de intervalos
-                const daysOfWeek = ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"];
-                daysOfWeek.forEach((day) => {
-                    const tasksForDay = plan.tasks.filter((task) => task.day === day);
-
-                    if (tasksForDay.length > 0) {
-                        const dayContainer = document.createElement("div");
-                        dayContainer.classList.add("day-container");
-                        dayContainer.innerHTML = `<h4>${day.charAt(0).toUpperCase() + day.slice(1)}</h4>`;
-
-                        // Aqui você pode organizar e exibir as tarefas de forma agrupada
-                        tasksForDay.forEach((task, index) => {
-                            const taskElement = document.createElement("div");
-                            taskElement.classList.add("task");
-                            taskElement.innerHTML = `
-                                <h5>Tarefa ${index + 1}</h5>
-                                <p><strong>Atividade:</strong> ${task.activity}</p>
-                                <p><strong>Início:</strong> ${task.startTime}</p>
-                                <p><strong>Término:</strong> ${task.endTime}</p>
-                            `;
-                            dayContainer.appendChild(taskElement);
-                        });
-
-                        tasksContainer.appendChild(dayContainer);
-                    }
-                });
-            }
-
-            planContainer.appendChild(tasksContainer);
+            modalContent.innerHTML = `
+                <h3>${plan.title}</h3>
+                <div class="tasks-container">
+                    ${tasksWithLateness.map((task, index) => `
+                        <div class="task">
+                            <h4>Tarefa ${index + 1}</h4>
+                            <p><strong>Atividade:</strong> ${task.activity}</p>
+                            <p><strong>Dificuldade:</strong> ${task.difficulty} dias</p>
+                            <p><strong>Dias até a entrega:</strong> ${task.daysUntil}</p>
+                            <p><strong>Atraso calculado:</strong> ${task.lateness} dias</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         } else {
-            const noTasksMessage = document.createElement("p");
-            noTasksMessage.textContent = "Este plano não possui tarefas.";
-            planContainer.appendChild(noTasksMessage);
+            const daysOfWeek = ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"];
+            const tasksByDay = {};
+
+            daysOfWeek.forEach(day => {
+                tasksByDay[day] = plan.tasks.filter(task => task.day === day);
+            });
+
+            modalContent.innerHTML = `
+                <h3>${plan.title}</h3>
+                <div class="tasks-container">
+                    ${daysOfWeek.map(day => {
+                        const tasksForDay = tasksByDay[day];
+                        if (tasksForDay.length === 0) return '';
+                        
+                        return `
+                            <div class="day-container">
+                                <h4>${day.charAt(0).toUpperCase() + day.slice(1)}</h4>
+                                ${tasksForDay.map((task, index) => `
+                                    <div class="task">
+                                        <h5>Tarefa ${index + 1}</h5>
+                                        <p><strong>Atividade:</strong> ${task.activity}</p>
+                                        <p><strong>Início:</strong> ${task.startTime}</p>
+                                        <p><strong>Término:</strong> ${task.endTime}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
         }
 
-        // Exibe o container com os detalhes do plano
-        document.body.appendChild(planContainer); // Adiciona o conteúdo ao body ou outro container desejado
-    } else {
-        console.error('Plano não encontrado');
-        alert("Plano não encontrado.");
+        // Adiciona botão de fechar
+        const closeButton = document.createElement('button');
+        closeButton.classList.add('close-modal');
+        closeButton.innerHTML = '×';
+        closeButton.onclick = () => modalOverlay.remove();
+
+        modalContent.insertBefore(closeButton, modalContent.firstChild);
+        modalOverlay.appendChild(modalContent);
+        document.body.appendChild(modalOverlay);
+
+        // Fechar modal ao clicar fora
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.remove();
+            }
+        });
     }
 }
 
