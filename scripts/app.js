@@ -307,9 +307,9 @@ function showPlanDetails(planId) {
   // Função para formatar o tipo do planejamento
   function formatPlanType(type) {
       const types = {
-          'intervalPartitioning': 'Planejamento Semanal',
-          'intervalScheduling': 'Planejamento do Dia',
-          'minimizeLateness': 'Planejamento de Estratégia'
+          'intervalPartitioning': 'Planejamento Físico',
+          'intervalScheduling': 'Planejamento Diário',
+          'minimizeLateness': 'Planejamento Estratégico'
       };
       return types[type] || type;
   }

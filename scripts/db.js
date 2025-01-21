@@ -20,9 +20,9 @@ class DatabaseConnection {
             const plans = await this.getPlannings();
             const newPlan = {
                 plan_id: Date.now(),
-                title: planData.algorithm === 'minimizeLateness' ? 'Planejamento de Estratégia' :
-                       planData.algorithm === 'intervalPartitioning' ? 'Planejamento Semanal' :
-                       'Planejamento do Dia',
+                title: planData.algorithm === 'minimizeLateness' ? 'Planejamento Estratégico' :
+                       planData.algorithm === 'intervalPartitioning' ? 'Planejamento Físico' :
+                       'Planejamento Diário',
                 plan_type: planData.algorithm,
                 created_at: new Date().toISOString(),
                 tasks: planData.tasks,
