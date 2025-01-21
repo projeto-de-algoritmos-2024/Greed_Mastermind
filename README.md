@@ -11,6 +11,9 @@
 | 221037975 | Natália Rodrigues de Morais |
 | 221021975 | Gabriel Santos Monteiro |
 
+##Vídeo
+[Link apresentação](https://youtu.be/f3FoBlj6eEg)
+
 ## Sobre
 O projeto é um **Planejador de Tarefas** que utiliza diferentes algoritmos ambiciosos para organizar e otimizar a execução de atividades. Este aplicativo web permite aos usuários adicionar tarefas e gerar planejamentos eficientes com base em diferentes estratégias.
 
