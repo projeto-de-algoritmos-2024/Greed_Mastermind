@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resultado do Planejamento</title>
-  <link rel="stylesheet" href="styles/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado do Planejamento</title>
+    <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
-  <h1>Planejamento Calculado</h1>
-
-  <!-- Exibindo o tipo de planejamento -->
-  <h2 id="planning-type"></h2>
-  
-  <!-- Container para as tarefas -->
-  <div id="tasks-container"></div>
-  <button id="back-to-home">Voltar para a Página Inicial</button>
-  <script src="result.js"></script>
+    <div class="results-container">
+        <div class="results-header">
+            <h1>Planejamento Calculado</h1>
+            <h2 id="planning-type"></h2>
+        </div>
+        <div id="tasks-container"></div>
+        <button id="back-to-home">Voltar para a Página Inicial</button>
+    </div>
+    <script src="scripts/db.js"></script>
+    <script src="result.js"></script>
 </body>
 </html>

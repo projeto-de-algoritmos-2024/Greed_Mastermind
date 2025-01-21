@@ -1,4 +1,4 @@
-// scripts/result.js
+// result.js
 
 // Carregar os dados do planejamento do localStorage
 const storedPlans = localStorage.getItem("plans");

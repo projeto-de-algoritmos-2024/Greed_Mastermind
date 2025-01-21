@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Adicionar Tarefas</title>
-  <link rel="stylesheet" href="styles/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Tarefas</title>
+    <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
-  <h1>Adicionar Tarefas</h1>
-  <div id="formContainer"></div>
-
-  <button id="addFormBtn">Adicionar mais tarefa</button>
-  <button id="calculateBtn">Calcular</button>
-
-  <script src="scripts/app.js"></script>
+    <div class="task-container">
+        <h1>Adicionar Tarefas</h1>
+        <div id="formContainer"></div>
+        <div class="button-group">
+            <button id="addFormBtn" class="btn-add">+ Adicionar mais tarefa</button>
+            <button id="calculateBtn" class="btn-calculate">Calcular</button>
+        </div>
+    </div>
+    <script src="scripts/db.js"></script>
+    <script src="scripts/app.js"></script>
 </body>
 </html>
